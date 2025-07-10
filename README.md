@@ -1,4 +1,4 @@
-Simulación del Llenado de un Tronco de Cono
+## Simulación del Llenado de un Tronco de Cono
 
 Este proyecto implementa una **visualización interactiva en 3D** del proceso de llenado de un depósito con forma de **tronco de cono**, utilizando **PyQt5** y **Matplotlib**. El propósito principal es mostrar cómo varía la **altura del agua** a medida que se llena el recipiente con una **tasa de flujo constante**.
 
@@ -12,14 +12,14 @@ Este proyecto forma parte de un proyecto relacionado con la aplicación de las *
 
 ## Funcionalidades
 
-- ✅ Interfaz gráfica intuitiva con PyQt5.
-- 🎛️ Entrada dinámica de parámetros: altura, radios y tasa de llenado.
-- 📈 Visualización en 3D del tronco de cono y el nivel de agua en tiempo real.
-- ⏯️ Botones de control:
-  - ▶ Iniciar Simulación
-  - ⏸ Detener Simulación
-  - 🔄 Reiniciar Parámetros
-- 📊 Cálculo e interpolación automática de la altura del agua con base en el volumen acumulado.
+- Interfaz gráfica intuitiva con PyQt5.
+- Entrada dinámica de parámetros: altura, radios y tasa de llenado.
+- Visualización en 3D del tronco de cono y el nivel de agua en tiempo real.
+- Botones de control:
+  - Iniciar Simulación
+  - Detener Simulación
+  - Reiniciar Parámetros
+- Cálculo e interpolación automática de la altura del agua con base en el volumen acumulado.
 
 ## Requisitos
 Instalar las dependencias con:
