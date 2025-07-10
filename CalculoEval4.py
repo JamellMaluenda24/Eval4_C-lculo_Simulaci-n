@@ -12,169 +12,162 @@ from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 
 # Clase principal de la interfaz gráfica
-class ConoWindow(QMainWindow):
+class VentanaCono(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Simulación del Llenado de un Tronco de Cono")
         self.setGeometry(200, 100, 1100, 750)
 
-        # Valores iniciales
+        # Parámetros iniciales
         self.altura_total = 2
-        self.radio_base = 6
+        self.radio_inferior = 6
         self.radio_superior = 4
-        self.flujo = 0.1
-        self.vol_actual = 0
+        self.tasa_llenado = 0.1
+        self.volumen_actual = 0
 
-        self.initUI()
+        self.inicializar_interfaz()
 
-    def initUI(self):
-        # Caja de parámetros de entrada
-        parametros_box = QGroupBox("Parámetros de la Simulación")
-        parametros_box.setFont(QFont("Arial", 10, QFont.Bold))
+    def inicializar_interfaz(self):
+        # Sección de parámetros
+        caja_parametros = QGroupBox("Parámetros de la Simulación")
+        caja_parametros.setFont(QFont("Arial", 10, QFont.Bold))
 
-        # Campos de entrada
-        self.input_altura = QLineEdit("2")
-        self.input_r_base = QLineEdit("6")
-        self.input_r_top = QLineEdit("4")
-        self.input_flujo = QLineEdit("0.1")
+        # Entradas de usuario
+        self.entrada_altura = QLineEdit("2")
+        self.entrada_radio_inferior = QLineEdit("6")
+        self.entrada_radio_superior = QLineEdit("4")
+        self.entrada_tasa = QLineEdit("0.1")
 
-        for campo in [self.input_altura, self.input_r_base, self.input_r_top, self.input_flujo]:
+        for campo in [self.entrada_altura, self.entrada_radio_inferior, self.entrada_radio_superior, self.entrada_tasa]:
             campo.setFixedWidth(100)
             campo.setAlignment(Qt.AlignRight)
             campo.setFont(QFont("Arial", 10))
 
-        # Formulario de entrada
-        form_inner_layout = QFormLayout()
-        form_inner_layout.setLabelAlignment(Qt.AlignRight)
-        form_inner_layout.setFormAlignment(Qt.AlignHCenter | Qt.AlignTop)
-        form_inner_layout.addRow("Altura total (m):", self.input_altura)
-        form_inner_layout.addRow("Radio inferior (m):", self.input_r_base)
-        form_inner_layout.addRow("Radio superior (m):", self.input_r_top)
-        form_inner_layout.addRow("Tasa de llenado (m³/s):", self.input_flujo)
+        formulario = QFormLayout()
+        formulario.setLabelAlignment(Qt.AlignRight)
+        formulario.setFormAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        formulario.addRow("Altura total (m):", self.entrada_altura)
+        formulario.addRow("Radio inferior (m):", self.entrada_radio_inferior)
+        formulario.addRow("Radio superior (m):", self.entrada_radio_superior)
+        formulario.addRow("Tasa de llenado (m³/s):", self.entrada_tasa)
 
-        form_container = QWidget()
-        form_container.setLayout(form_inner_layout)
+        contenedor_formulario = QWidget()
+        contenedor_formulario.setLayout(formulario)
 
-        # Botón para iniciar
-        self.boton = QPushButton("▶ Iniciar Simulación")
-        self.boton.setFont(QFont("Arial", 10, QFont.Bold))
-        self.boton.setStyleSheet("background-color: #4CAF50; color: white; padding: 6px 12px;")
-        self.boton.clicked.connect(self.iniciar_simulacion)
+        # Botones
+        self.boton_iniciar = QPushButton("▶ Iniciar Simulación")
+        self.boton_iniciar.setFont(QFont("Arial", 10, QFont.Bold))
+        self.boton_iniciar.setStyleSheet("background-color: #4CAF50; color: white; padding: 6px 12px;")
+        self.boton_iniciar.clicked.connect(self.iniciar_simulacion)
 
-        # Botón para detener
         self.boton_detener = QPushButton("⏸ Detener Simulación")
         self.boton_detener.setFont(QFont("Arial", 10, QFont.Bold))
         self.boton_detener.setStyleSheet("background-color: #f44336; color: white; padding: 6px 12px;")
         self.boton_detener.clicked.connect(self.detener_simulacion)
 
-        # Botón para reiniciar
         self.boton_reiniciar = QPushButton("🔄 Reiniciar Parámetros")
         self.boton_reiniciar.setFont(QFont("Arial", 10, QFont.Bold))
         self.boton_reiniciar.setStyleSheet("background-color: #2196F3; color: white; padding: 6px 12px;")
         self.boton_reiniciar.clicked.connect(self.reiniciar_parametros)
 
-        # Agrupación de botones
-        boton_layout = QHBoxLayout()
-        boton_layout.addStretch()
-        boton_layout.addWidget(self.boton)
-        boton_layout.addWidget(self.boton_detener)
-        boton_layout.addWidget(self.boton_reiniciar)
-        boton_layout.addStretch()
+        layout_botones = QHBoxLayout()
+        layout_botones.addStretch()
+        layout_botones.addWidget(self.boton_iniciar)
+        layout_botones.addWidget(self.boton_detener)
+        layout_botones.addWidget(self.boton_reiniciar)
+        layout_botones.addStretch()
 
-        # Composición vertical
-        vbox_form = QVBoxLayout()
-        vbox_form.setAlignment(Qt.AlignCenter)
-        vbox_form.addWidget(form_container)
-        vbox_form.addSpacing(10)
-        vbox_form.addLayout(boton_layout)
+        layout_vertical = QVBoxLayout()
+        layout_vertical.setAlignment(Qt.AlignCenter)
+        layout_vertical.addWidget(contenedor_formulario)
+        layout_vertical.addSpacing(10)
+        layout_vertical.addLayout(layout_botones)
 
-        parametros_box.setLayout(vbox_form)
+        caja_parametros.setLayout(layout_vertical)
 
-        # Canvas para el gráfico 3D
+        # Canvas 3D para el gráfico
         self.canvas = FigureCanvas(Figure(figsize=(6, 6)))
-        self.ax = self.canvas.figure.add_subplot(111, projection='3d')
+        self.ejes = self.canvas.figure.add_subplot(111, projection='3d')
 
-        # Layout horizontal principal
-        hbox = QHBoxLayout()
-        hbox.addWidget(parametros_box)
-        hbox.addWidget(self.canvas)
+        layout_principal = QHBoxLayout()
+        layout_principal.addWidget(caja_parametros)
+        layout_principal.addWidget(self.canvas)
 
         contenedor = QWidget()
-        contenedor.setLayout(hbox)
+        contenedor.setLayout(layout_principal)
         self.setCentralWidget(contenedor)
 
     def iniciar_simulacion(self):
         try:
-            self.altura_total = float(self.input_altura.text())
-            self.radio_base = float(self.input_r_base.text())
-            self.radio_superior = float(self.input_r_top.text())
-            self.flujo = float(self.input_flujo.text())
-            self.vol_actual = 0
+            self.altura_total = float(self.entrada_altura.text())
+            self.radio_inferior = float(self.entrada_radio_inferior.text())
+            self.radio_superior = float(self.entrada_radio_superior.text())
+            self.tasa_llenado = float(self.entrada_tasa.text())
+            self.volumen_actual = 0
         except ValueError:
             QMessageBox.warning(self, "Error", "Todos los campos deben ser numéricos.")
             return
 
-        # Tabla volumen-altura
-        self.vol_lookup = []
+        # Tabla de volumen vs altura
+        self.tabla_volumen_altura = []
         alturas = np.linspace(0, self.altura_total, 1000)
         for h in alturas:
-            r = self.radio_en_h(h)
-            v = (1/3) * np.pi * h * (self.radio_base**2 + self.radio_base*r + r**2)
-            self.vol_lookup.append((v, h))
+            r = self.radio_a_altura(h)
+            v = (1/3) * np.pi * h * (self.radio_inferior**2 + self.radio_inferior*r + r**2)
+            self.tabla_volumen_altura.append((v, h))
 
-        # Iniciar animación
-        self.ani = FuncAnimation(self.canvas.figure, self.actualizar, interval=100)
+        self.animacion = FuncAnimation(self.canvas.figure, self.actualizar_grafico, interval=100)
         self.canvas.draw()
 
     def detener_simulacion(self):
-        if hasattr(self, 'ani'):
-            self.ani.event_source.stop()
+        if hasattr(self, 'animacion'):
+            self.animacion.event_source.stop()
 
     def reiniciar_parametros(self):
-        self.input_altura.setText("2")
-        self.input_r_base.setText("6")
-        self.input_r_top.setText("4")
-        self.input_flujo.setText("0.1")
-        self.vol_actual = 0
+        self.entrada_altura.setText("2")
+        self.entrada_radio_inferior.setText("6")
+        self.entrada_radio_superior.setText("4")
+        self.entrada_tasa.setText("0.1")
+        self.volumen_actual = 0
         self.canvas.figure.clf()
-        self.ax = self.canvas.figure.add_subplot(111, projection='3d')
+        self.ejes = self.canvas.figure.add_subplot(111, projection='3d')
         self.canvas.draw()
 
-    def radio_en_h(self, h):
-        return self.radio_base - ((self.radio_base - self.radio_superior) / self.altura_total) * h
+    def radio_a_altura(self, altura):
+        return self.radio_inferior - ((self.radio_inferior - self.radio_superior) / self.altura_total) * altura
 
-    def altura_por_volumen(self, v_actual):
-        vols, hs = zip(*self.vol_lookup)
-        return np.interp(v_actual, vols, hs)
+    def altura_por_volumen(self, volumen):
+        volúmenes, alturas = zip(*self.tabla_volumen_altura)
+        return np.interp(volumen, volúmenes, alturas)
 
-    def get_cono(self, h):
-        theta = np.linspace(0, 2*np.pi, 30)
-        z = np.linspace(0, h, 30)
-        theta_grid, z_grid = np.meshgrid(theta, z)
-        r_grid = self.radio_base - ((self.radio_base - self.radio_superior) / self.altura_total) * z_grid
-        x = r_grid * np.cos(theta_grid)
-        y = r_grid * np.sin(theta_grid)
+    def obtener_cono(self, altura):
+        angulo = np.linspace(0, 2*np.pi, 30)
+        z = np.linspace(0, altura, 30)
+        angulo_grid, z_grid = np.meshgrid(angulo, z)
+        radio_grid = self.radio_inferior - ((self.radio_inferior - self.radio_superior) / self.altura_total) * z_grid
+        x = radio_grid * np.cos(angulo_grid)
+        y = radio_grid * np.sin(angulo_grid)
         return x, y, z_grid
 
-    def actualizar(self, frame):
-        self.ax.clear()
-        self.ax.set_xlim([-self.radio_base, self.radio_base])
-        self.ax.set_ylim([-self.radio_base, self.radio_base])
-        self.ax.set_zlim([0, self.altura_total])
+    def actualizar_grafico(self, frame):
+        self.ejes.clear()
+        self.ejes.set_xlim([-self.radio_inferior, self.radio_inferior])
+        self.ejes.set_ylim([-self.radio_inferior, self.radio_inferior])
+        self.ejes.set_zlim([0, self.altura_total])
 
-        self.vol_actual += self.flujo * 0.1
-        h = self.altura_por_volumen(self.vol_actual)
-        self.ax.set_title(f"Altura del agua: {h:.2f} m", fontsize=10)
+        self.volumen_actual += self.tasa_llenado * 0.1
+        altura_actual = self.altura_por_volumen(self.volumen_actual)
+        self.ejes.set_title(f"Altura del agua: {altura_actual:.2f} m", fontsize=10)
 
-        x_cono, y_cono, z_cono = self.get_cono(self.altura_total)
-        self.ax.plot_surface(x_cono, y_cono, z_cono, color='lightgray', alpha=0.2)
+        x_cono, y_cono, z_cono = self.obtener_cono(self.altura_total)
+        self.ejes.plot_surface(x_cono, y_cono, z_cono, color='lightgray', alpha=0.2)
 
-        x_agua, y_agua, z_agua = self.get_cono(h)
-        self.ax.plot_surface(x_agua, y_agua, z_agua, color='blue', alpha=0.6)
+        x_agua, y_agua, z_agua = self.obtener_cono(altura_actual)
+        self.ejes.plot_surface(x_agua, y_agua, z_agua, color='blue', alpha=0.6)
 
 # Ejecutar aplicación
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ventana = ConoWindow()
+    ventana = VentanaCono()
     ventana.show()
     sys.exit(app.exec_())
