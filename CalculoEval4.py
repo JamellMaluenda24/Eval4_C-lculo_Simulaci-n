@@ -1,4 +1,3 @@
-# Importación de librerías necesarias
 import sys
 import numpy as np
 from PyQt5.QtWidgets import (
@@ -11,12 +10,12 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 
-# Clase principal de la interfaz gráfica
 class VentanaCono(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Simulación del Llenado de un Tronco de Cono")
-        self.setGeometry(200, 100, 1100, 750)
+        self.setGeometry(200, 100, 1150, 750)
+        self.setStyleSheet("background-color: #f5f7fa;")  # Fondo muy claro y suave
 
         # Parámetros iniciales
         self.altura_total = 2
@@ -28,24 +27,59 @@ class VentanaCono(QMainWindow):
         self.inicializar_interfaz()
 
     def inicializar_interfaz(self):
-        # Sección de parámetros
-        caja_parametros = QGroupBox("Parámetros de la Simulación")
-        caja_parametros.setFont(QFont("Arial", 10, QFont.Bold))
+        # Fuente moderna
+        fuente_titulo = QFont("Segoe UI", 11, QFont.Bold)
+        fuente_label = QFont("Segoe UI", 10)
+        fuente_input = QFont("Segoe UI", 10)
+        fuente_boton = QFont("Segoe UI", 10, QFont.Bold)
 
-        # Entradas de usuario
+        # Sección parámetros
+        caja_parametros = QGroupBox("Parámetros de la Simulación")
+        caja_parametros.setFont(fuente_titulo)
+        caja_parametros.setStyleSheet("""
+            QGroupBox {
+                border: 2px solid #3498db;
+                border-radius: 8px;
+                margin-top: 12px;
+                background-color: white;
+            }
+            QGroupBox:title {
+                subcontrol-origin: margin;
+                left: 12px;
+                padding: 0 3px 0 3px;
+                color: #2c3e50;
+            }
+        """)
+
+        # Entradas
         self.entrada_altura = QLineEdit("7")
         self.entrada_radio_inferior = QLineEdit("6")
         self.entrada_radio_superior = QLineEdit("4")
         self.entrada_tasa = QLineEdit("0.1")
 
         for campo in [self.entrada_altura, self.entrada_radio_inferior, self.entrada_radio_superior, self.entrada_tasa]:
-            campo.setFixedWidth(100)
+            campo.setFixedWidth(130)
             campo.setAlignment(Qt.AlignRight)
-            campo.setFont(QFont("Arial", 10))
+            campo.setFont(fuente_input)
+            campo.setStyleSheet("""
+                QLineEdit {
+                    border: 1.5px solid #bdc3c7;
+                    border-radius: 6px;
+                    padding: 4px 8px;
+                    background-color: #ecf0f1;
+                    color: #34495e;
+                }
+                QLineEdit:focus {
+                    border-color: #2980b9;
+                    background-color: #ffffff;
+                }
+            """)
 
         formulario = QFormLayout()
         formulario.setLabelAlignment(Qt.AlignRight)
         formulario.setFormAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        formulario.setHorizontalSpacing(20)
+        formulario.setVerticalSpacing(15)
         formulario.addRow("Altura total (m):", self.entrada_altura)
         formulario.addRow("Radio inferior (m):", self.entrada_radio_inferior)
         formulario.addRow("Radio superior (m):", self.entrada_radio_superior)
@@ -54,23 +88,41 @@ class VentanaCono(QMainWindow):
         contenedor_formulario = QWidget()
         contenedor_formulario.setLayout(formulario)
 
-        # Botones
+        # Botones con estilo moderno y efecto hover
         self.boton_iniciar = QPushButton("▶ Iniciar Simulación")
-        self.boton_iniciar.setFont(QFont("Arial", 10, QFont.Bold))
-        self.boton_iniciar.setStyleSheet("background-color: #4CAF50; color: white; padding: 6px 12px;")
-        self.boton_iniciar.clicked.connect(self.iniciar_simulacion)
-
         self.boton_detener = QPushButton("⏸ Detener Simulación")
-        self.boton_detener.setFont(QFont("Arial", 10, QFont.Bold))
-        self.boton_detener.setStyleSheet("background-color: #f44336; color: white; padding: 6px 12px;")
-        self.boton_detener.clicked.connect(self.detener_simulacion)
-
         self.boton_reiniciar = QPushButton("🔄 Reiniciar Parámetros")
-        self.boton_reiniciar.setFont(QFont("Arial", 10, QFont.Bold))
-        self.boton_reiniciar.setStyleSheet("background-color: #2196F3; color: white; padding: 6px 12px;")
+
+        for boton, color_base in [
+            (self.boton_iniciar, "#27ae60"),
+            (self.boton_detener, "#c0392b"),
+            (self.boton_reiniciar, "#2980b9"),
+        ]:
+            boton.setFont(fuente_boton)
+            boton.setCursor(Qt.PointingHandCursor)
+            boton.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {color_base};
+                    color: white;
+                    border-radius: 8px;
+                    padding: 8px 18px;
+                    border: none;
+                    transition: background-color 0.3s ease;
+                }}
+                QPushButton:hover {{
+                    background-color: #1c5980;
+                }}
+                QPushButton:pressed {{
+                    background-color: #145374;
+                }}
+            """)
+
+        self.boton_iniciar.clicked.connect(self.iniciar_simulacion)
+        self.boton_detener.clicked.connect(self.detener_simulacion)
         self.boton_reiniciar.clicked.connect(self.reiniciar_parametros)
 
         layout_botones = QHBoxLayout()
+        layout_botones.setSpacing(15)
         layout_botones.addStretch()
         layout_botones.addWidget(self.boton_iniciar)
         layout_botones.addWidget(self.boton_detener)
@@ -78,25 +130,34 @@ class VentanaCono(QMainWindow):
         layout_botones.addStretch()
 
         layout_vertical = QVBoxLayout()
-        layout_vertical.setAlignment(Qt.AlignCenter)
+        layout_vertical.setContentsMargins(20, 15, 20, 20)
+        layout_vertical.setSpacing(20)
+        layout_vertical.setAlignment(Qt.AlignTop)
         layout_vertical.addWidget(contenedor_formulario)
-        layout_vertical.addSpacing(10)
         layout_vertical.addLayout(layout_botones)
 
         caja_parametros.setLayout(layout_vertical)
 
-        # Canvas 3D para el gráfico
+        # Canvas para gráfico 3D con borde y sombra sutil
         self.canvas = FigureCanvas(Figure(figsize=(6, 6)))
+        self.canvas.setStyleSheet("""
+            border: 1.5px solid #bdc3c7;
+            border-radius: 10px;
+            background-color: white;
+        """)
         self.ejes = self.canvas.figure.add_subplot(111, projection='3d')
 
         layout_principal = QHBoxLayout()
-        layout_principal.addWidget(caja_parametros)
-        layout_principal.addWidget(self.canvas)
+        layout_principal.setContentsMargins(15, 15, 15, 15)
+        layout_principal.setSpacing(30)
+        layout_principal.addWidget(caja_parametros, stretch=0)
+        layout_principal.addWidget(self.canvas, stretch=1)
 
         contenedor = QWidget()
         contenedor.setLayout(layout_principal)
         self.setCentralWidget(contenedor)
 
+    # Resto del código (sin cambios)
     def iniciar_simulacion(self):
         try:
             self.altura_total = float(self.entrada_altura.text())
@@ -108,7 +169,6 @@ class VentanaCono(QMainWindow):
             QMessageBox.warning(self, "Error", "Todos los campos deben ser numéricos.")
             return
 
-        # Tabla de volumen vs altura
         self.tabla_volumen_altura = []
         alturas = np.linspace(0, self.altura_total, 1000)
         for h in alturas:
@@ -118,6 +178,20 @@ class VentanaCono(QMainWindow):
 
         self.animacion = FuncAnimation(self.canvas.figure, self.actualizar_grafico, interval=100)
         self.canvas.draw()
+
+        h_eval = 1.5
+        r_h = self.radio_a_altura(h_eval)
+        dV_dh = (np.pi / 3) * (self.radio_inferior**2 + self.radio_inferior * r_h + r_h**2
+                               + h_eval * (-2/7) * (self.radio_inferior + r_h))
+
+        dh_dt = self.tasa_llenado / dV_dh
+
+        QMessageBox.information(
+            self,
+            "Resultado",
+            f"Para h = {h_eval} m, la velocidad de subida es aproximadamente:\n"
+            f"dh/dt ≈ {dh_dt:.6f} m/s"
+        )
 
     def detener_simulacion(self):
         if hasattr(self, 'animacion'):
@@ -157,15 +231,14 @@ class VentanaCono(QMainWindow):
 
         self.volumen_actual += self.tasa_llenado * 0.1
         altura_actual = self.altura_por_volumen(self.volumen_actual)
-        self.ejes.set_title(f"Altura del agua: {altura_actual:.2f} m", fontsize=10)
+        self.ejes.set_title(f"Altura del agua: {altura_actual:.2f} m", fontsize=12, color="#34495e")
 
         x_cono, y_cono, z_cono = self.obtener_cono(self.altura_total)
-        self.ejes.plot_surface(x_cono, y_cono, z_cono, color='lightgray', alpha=0.2)
+        self.ejes.plot_surface(x_cono, y_cono, z_cono, color='#bdc3c7', alpha=0.25)
 
         x_agua, y_agua, z_agua = self.obtener_cono(altura_actual)
-        self.ejes.plot_surface(x_agua, y_agua, z_agua, color='blue', alpha=0.6)
+        self.ejes.plot_surface(x_agua, y_agua, z_agua, color='#2980b9', alpha=0.7)
 
-# Ejecutar aplicación
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     ventana = VentanaCono()
