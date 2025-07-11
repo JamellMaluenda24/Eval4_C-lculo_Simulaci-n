@@ -33,7 +33,7 @@ class VentanaCono(QMainWindow):
         caja_parametros.setFont(QFont("Arial", 10, QFont.Bold))
 
         # Entradas de usuario
-        self.entrada_altura = QLineEdit("2")
+        self.entrada_altura = QLineEdit("7")
         self.entrada_radio_inferior = QLineEdit("6")
         self.entrada_radio_superior = QLineEdit("4")
         self.entrada_tasa = QLineEdit("0.1")
